@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient locationClient;
     private LocationRequest request;
     private LocationCallback callback;
+    private LatLng currentLocation;
 
     private enum State {
         STOPPED,
@@ -87,13 +89,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     return;
                 }
                 Location location = locationResult.getLastLocation();
-                LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
-                infoView.setText(getString(R.string.latlng_format, ll.latitude, ll.longitude));
-                if (map == null) {
-                    Log.d(TAG, "onLocationResult: map == null");
-                    return;
-                }
-                map.animateCamera(CameraUpdateFactory.newLatLng(ll));
+                currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                infoView.setText(getString(R.string.latlng_format, currentLocation.latitude, currentLocation.longitude));
             }
         };
     }
@@ -188,5 +185,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(TAG, "stopLocationUpdate");
         locationClient.removeLocationUpdates(callback);
         state = State.STOPPED;
+    }
+
+    public void onClickButton(View v) {
+        Log.d(TAG, "onClickButton");
+        if (map == null) {
+            Log.d(TAG, "onClickButton: map == null");
+            return;
+        }
+        if (currentLocation == null) {
+            Log.d(TAG, "onClickButton: currentLocation == null");
+            return;
+        }
+        map.animateCamera(CameraUpdateFactory.newLatLng(currentLocation));
     }
 }
